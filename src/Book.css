@@ -1,0 +1,23 @@
+img {
+    width: 128px;
+    height: 200px;
+}
+.item {
+    background-color: #EFF4FB;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+}
+button {
+    cursor: pointer;
+}
+
+button:disabled {
+    background-color: gray;
+    cursor: not-allowed;
+}
+button:disabled:hover {
+    background-color: gray;
+}
