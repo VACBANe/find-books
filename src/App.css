@@ -40,7 +40,7 @@ button:active {
     height: 100%;
     margin: 20px auto;
     background-color: #FFFFFF;
-    border-radius: 3%;
+    border-radius: 20px;
 }
 
 .books {
@@ -49,4 +49,13 @@ button:active {
     grid-template-columns: 1fr 1fr 1fr;
     grid-column-gap: 5px;
     grid-row-gap: 5px;
+}
+
+span {
+    padding: 3px;
+    cursor: pointer;
+}
+span:hover {
+    color: blue;
+    background-color: rgb(154, 154, 255);
 }

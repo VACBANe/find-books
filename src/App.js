@@ -2,35 +2,68 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import Book from "./Book";
 import "./App.css";
+import Loader from "./Loader";
 
 function App() {
     const [books, setBooks] = useState([]);
     const [searchText, setSearchText] = useState("");
-    useEffect(() => {
-        axios
-            .get(
-                "https://www.googleapis.com/books/v1/volumes?q=flowers+inauthor:keyes&maxResults=9&key=AIzaSyDrkICrYDmr7VGdDa3dlc0BvTIus_4fTR4"
-            )
-            .then((response) => {
-                console.log(response);
-                setBooks(response.data.items);
-            });
-    }, []);
+    const [currBook, setCurrBook] = useState("flowers+inauthor:keyes");
+    const [lastItem, setLastItem] = useState(0);
+    const [isLoading, setIsLoading] = useState(false);
+    const [isLoadingMore, setIsLoadingMore] = useState(false);
+
     const onChangeHandler = (e) => {
         setSearchText(e.target.value);
     };
-    const searchBook = () => {
-        let search = searchText.replace(" ", "+").toLowerCase();
-        console.log(search);
+
+    const onPageChanged = () => {
+        setIsLoadingMore(true);
         axios
             .get(
-                `https://www.googleapis.com/books/v1/volumes?q=${searchText}&maxResults=9&key=AIzaSyDrkICrYDmr7VGdDa3dlc0BvTIus_4fTR4`
+                `https://www.googleapis.com/books/v1/volumes?q=${currBook}&maxResults=9&startIndex=${lastItem}&key=AIzaSyDrkICrYDmr7VGdDa3dlc0BvTIus_4fTR4`
+            )
+            .then((response) => {
+                console.log(response.data);
+                if (response.data.items) {
+                    let newBooks = [...books, ...response.data.items];
+                    setBooks(newBooks);
+                } else {
+                    alert("No results");
+                }
+                setIsLoadingMore(false);
+            });
+        setLastItem(lastItem + 9);
+    };
+
+    useEffect(() => {
+        setIsLoading(true);
+        axios
+            .get(
+                `https://www.googleapis.com/books/v1/volumes?q=${currBook}&maxResults=9&key=AIzaSyDrkICrYDmr7VGdDa3dlc0BvTIus_4fTR4`
             )
             .then((response) => {
                 console.log(response);
                 setBooks(response.data.items);
+                setIsLoading(false);
+            });
+        setLastItem(lastItem + 9);
+    }, []);
+
+    const searchBook = () => {
+        setIsLoading(true);
+        let search = searchText.replace(" ", "+").toLowerCase();
+        setCurrBook(search);
+        axios
+            .get(
+                `https://www.googleapis.com/books/v1/volumes?q=${search}&maxResults=9&key=AIzaSyDrkICrYDmr7VGdDa3dlc0BvTIus_4fTR4`
+            )
+            .then((response) => {
+                console.log(response);
+                setBooks(response.data.items);
+                setIsLoading(false);
             });
         setSearchText("");
+        setLastItem(lastItem + 9);
     };
     return (
         <div className="container">
@@ -42,6 +75,7 @@ function App() {
                 placeholder={"Input book name"}
             />
             <button onClick={searchBook}>Search</button>
+            <div style={{marginTop: "20px"}}>{isLoading && <Loader/>}</div>
             <div className="books">
                 {books &&
                     books.map((book) => (
@@ -53,6 +87,13 @@ function App() {
                         />
                     ))}
             </div>
+            {isLoadingMore ? (
+                <Loader />
+            ) : (
+                <button onClick={onPageChanged} style={{ marginTop: "20px" }}>
+                    More
+                </button>
+            )}
         </div>
     );
 }
